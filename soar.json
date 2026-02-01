@@ -3,6 +3,7 @@
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "soar",
         "options": {}
       },
@@ -30,11 +31,12 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "",
+                    "leftValue": "={{ !!$json.body.url }}",
                     "rightValue": "",
                     "operator": {
-                      "type": "string",
-                      "operation": "equals"
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
                     },
                     "id": "3be2c80e-71c6-497b-87fc-20c287515caa"
                   }
@@ -103,12 +105,22 @@
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71268c8c-c1fb-423d-949d-62556a4cf363",
+              "name": "Hasil",
+              "value": "=🚨 **Laporan Analisis URLScan.io** 🚨 \n\n🔍 **Target:** {{ $json.page.url }}\n🛡️ **Status:** {{ $json.verdicts.overall.malicious ? '🔴 MALICIOUS' : '🟢 CLEAN' }}\n💯 **Skor Risiko:** {{ $json.verdicts.overall.score }}\n\n**Detail Infrastruktur:**\n🌍 **IP:** {{ $json.page.ip }}\n🏳️ **Negara:** {{ $json.page.country }}\n🏢 **ISP:** {{ $json.page.asnname }}\n\n📸 **Screenshot:** {{ $json.task.screenshotURL }}\n🔗 **Laporan Lengkap:** {{ $json.task.reportURL }}",
+              "type": "string"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        832,
+        1040,
         -208
       ],
       "id": "7bfca403-a899-4d3b-a2f6-110dee47f8a8",
@@ -121,8 +133,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        464,
-        -48
+        528,
+        -16
       ],
       "id": "fb5203c5-59c5-4dcc-8534-8e15d559b85b",
       "name": "Edit Fields1"
@@ -134,21 +146,22 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        256,
-        64
+        224,
+        176
       ],
       "id": "886a3a94-290a-4bf5-bc47-ee0127d85f7e",
       "name": "Edit Fields2"
     },
     {
       "parameters": {
+        "url": "={{ $json.body.url }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.urlScanIo",
       "typeVersion": 1,
       "position": [
-        48,
-        -160
+        272,
+        -128
       ],
       "id": "7f492e12-6974-4fe9-ac86-26fd7d1fa9f8",
       "name": "Perform a scan",
@@ -166,8 +179,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        352,
-        -208
+        416,
+        -192
       ],
       "id": "0bb8c739-050e-4108-9874-e30a44152697",
       "name": "Wait",
@@ -175,12 +188,13 @@
     },
     {
       "parameters": {
-        "operation": "get"
+        "operation": "get",
+        "scanId": "={{ $json.scanId }}"
       },
       "type": "n8n-nodes-base.urlScanIo",
       "typeVersion": 1,
       "position": [
-        480,
+        688,
         -208
       ],
       "id": "97e5e58e-6d9e-45c0-b9af-e3745d3d0afd",
@@ -191,6 +205,54 @@
           "name": "urlscan.io account"
         }
       }
+    },
+    {
+      "parameters": {
+        "chatId": "1687588177",
+        "text": "={{ $json.Hasil }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        -208
+      ],
+      "id": "771983dc-0144-44a3-a8b3-4868a5d38f7f",
+      "name": "Send a text message",
+      "webhookId": "3bb668fe-a8b9-4d67-a311-c1601baa230f",
+      "credentials": {
+        "telegramApi": {
+          "id": "OT8m2d8L2FcFi42d",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "curlImport": "",
+        "httpVariantWarning": "",
+        "method": "GET",
+        "url": "https://www.virustotal.com/api/v3/Files",
+        "": "",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "virusTotalApi",
+        "provideSslCertificates": false,
+        "sendQuery": false,
+        "sendHeaders": false,
+        "sendBody": false,
+        "options": {},
+        "infoMessage": ""
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "93ad9e62-d46f-49e4-8da1-30f9c471b84f",
+      "name": "VirusTotal HTTP Request",
+      "extendsCredential": "virusTotalApi"
     }
   ],
   "pinData": {},
@@ -217,7 +279,7 @@
         ],
         [
           {
-            "node": "Edit Fields1",
+            "node": "VirusTotal HTTP Request",
             "type": "main",
             "index": 0
           }
@@ -263,6 +325,28 @@
           }
         ]
       ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VirusTotal HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -270,7 +354,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "61610033-05d4-461c-b5de-7be1f7e4abbc",
+  "versionId": "91a69812-171c-4554-8522-9b171cb6211c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "a7679ee6572b8943a21f7afbce2bff7bd3faadfb465a19d7edc7d228b47b3df7"
