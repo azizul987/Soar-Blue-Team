@@ -1,52 +1,158 @@
 # SOAR Automation with n8n
 
-Project ini membuat workflow SOAR sederhana untuk membantu SOC analyst melakukan triage dan enrichment alert keamanan secara otomatis.
+Project ini adalah automation sederhana untuk membantu SOC analyst melakukan pengecekan awal terhadap alert keamanan secara otomatis.
+
+Workflow ini dibuat menggunakan n8n untuk mengecek reputasi IP address, hash file, dan URL phishing. Hasil pengecekan akan dikirim otomatis ke Telegram agar analyst tidak perlu melakukan pengecekan manual satu per satu.
+
+---
 
 ## Workflow
-1. Network Investigation - Cek reputasi IP address.
-2. File Forensics - Cek hash malware.
-3. Phishing Triage - Analisa URL dan screenshot website.
+
+Project ini memiliki 3 workflow utama:
+
+1. Network Investigation  
+   Mengecek reputasi IP address menggunakan AbuseIPDB atau VirusTotal.
+
+2. File Forensics  
+   Mengecek hash file untuk mengetahui apakah file terdeteksi sebagai malware menggunakan VirusTotal.
+
+3. Phishing Triage  
+   Menganalisis URL yang dicurigai phishing menggunakan URLScan.io dan mengirim hasilnya ke Telegram.
+
+---
 
 ## Tools
+
+Tools yang digunakan:
+
 - n8n
 - VirusTotal API
 - AbuseIPDB API
 - URLScan.io API
 - Telegram Bot
-# Credentials Required
+- Postman
 
-Project ini membutuhkan beberapa API key yang dimasukkan langsung melalui n8n Credentials.
+---
 
-## 1. VirusTotal
-Dipakai untuk:
-- Cek hash malware
-- Cek reputasi URL/IP
+## Credentials
 
-Masukkan API key di HTTP Request credential/header.
+API key dan token tidak disimpan di GitHub.
 
-## 2. AbuseIPDB
-Dipakai untuk:
-- Cek reputasi IP address
-- Ambil country dan risk score
+Semua credential dimasukkan langsung melalui n8n Credentials atau pada HTTP Request node.
 
-Masukkan API key di HTTP Request credential/header.
+Credential yang dibutuhkan:
 
-## 3. URLScan.io
-Dipakai untuk:
-- Scan URL phishing
-- Ambil screenshot website
-- Ambil verdict malicious/clean
+- VirusTotal API Key
+- AbuseIPDB API Key
+- URLScan.io API Key
+- Telegram Bot Token
+- Telegram Chat ID
 
-Masukkan API key di HTTP Request credential/header.
+---
 
-## 4. Telegram Bot
-Dipakai untuk:
-- Mengirim hasil enrichment ke grup/channel SOC
+## Network Investigation
 
-Masukkan bot token dan chat ID di node Telegram atau HTTP Request.
+Workflow ini digunakan untuk mengecek reputasi IP address.
+
+Contoh input webhook:
+
+    {
+      "ip": "103.x.x.x"
+    }
+
+Hasil yang dikirim ke Telegram:
+
+- IP Address
+- Negara asal
+- Risk score
+- Status reputasi IP
+
+Screenshot terkait:
+
+- screenshots/01-network-workflow.png
+- screenshots/01-network-webhook-test.png
+- screenshots/01-network-telegram-output.png
+
+---
+
+## File Forensics
+
+Workflow ini digunakan untuk mengecek hash file dan mengetahui apakah file tersebut terdeteksi sebagai malware.
+
+Contoh input webhook:
+
+    {
+      "hash": "44d88612fea8a8f36de82e1278abb02f"
+    }
+
+Hasil yang dikirim ke Telegram:
+
+- Hash file
+- Nama file
+- Jenis malware
+- Jumlah deteksi
+- Status file
+
+Screenshot terkait:
+
+- screenshots/02-file-workflow.png
+- screenshots/02-file-webhook-test.png
+- screenshots/02-file-telegram-output.png
+
+---
+
+## Phishing Triage
+
+Workflow ini digunakan untuk menganalisis URL yang dicurigai sebagai phishing.
+
+Contoh input webhook:
+
+    {
+      "url": "http://example.com"
+    }
+
+Hasil yang dikirim ke Telegram:
+
+- URL
+- Status malicious atau clean
+- Verdict hasil scan
+- Screenshot tampilan website
+
+Screenshot terkait:
+
+- screenshots/03-phishing-workflow.png
+- screenshots/03-phishing-webhook-test.png
+- screenshots/03-phishing-urlscan-result.png
+- screenshots/03-phishing-telegram-output.png
+
+---
+
 ## Cara Menjalankan
-1. Import file JSON dari folder `workflows/` ke n8n.
-2. Buat credential API sesuai `.env.example`.
-3. Aktifkan workflow.
-4. Trigger webhook menggunakan Postman atau script Python.
-5. Cek hasil notifikasi di Telegram.
+
+1. Buka n8n.
+2. Import file workflow dari folder workflows.
+3. Masukkan API key dan token pada credential n8n.
+4. Aktifkan workflow.
+5. Test webhook menggunakan Postman.
+6. Cek hasil notifikasi di Telegram.
+
+---
+
+## Testing
+
+Testing dilakukan dengan mengirim request POST ke webhook n8n menggunakan Postman.
+
+Workflow dianggap berhasil jika:
+
+- Webhook menerima input.
+- API mengembalikan hasil enrichment.
+- Workflow berjalan tanpa error.
+- Telegram menerima notifikasi sesuai output yang diminta.
+
+---
+
+## Notes
+
+Project ini hanya berfokus pada automation triage dan enrichment dasar.
+
+Project ini belum melakukan response otomatis seperti block IP, isolate endpoint, atau integrasi dengan SIEM/EDR.
