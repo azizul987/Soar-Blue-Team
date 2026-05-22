@@ -1,0 +1,450 @@
+{
+  "name": "Phishing Triage",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "scanId": "={{ $('Perform a scan').item.json.scanId }}"
+      },
+      "type": "n8n-nodes-base.urlScanIo",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        144
+      ],
+      "id": "e0a82669-fe4a-4c17-b71c-2f87319e6655",
+      "name": "Get a scan",
+      "credentials": {
+        "urlScanIoApi": {
+          "id": "QagPzSmYyxMEQVqZ",
+          "name": "urlscan.io account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Soar",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1808,
+        496
+      ],
+      "id": "35d99dfe-cc12-4c47-9487-a2d54f45934f",
+      "name": "Webhook",
+      "webhookId": "2b61514b-2bc9-48b3-9ff9-eb6c8913535e"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        144
+      ],
+      "id": "ee1248ba-df75-439d-834b-ee644ed46248",
+      "name": "Wait",
+      "webhookId": "839e64bd-d4cd-4c83-8d57-c3eb4eb47eab"
+    },
+    {
+      "parameters": {
+        "chatId": "1687588177",
+        "text": "={{ $json.HASIL }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        496
+      ],
+      "id": "9ed34a5c-9c5d-4166-9da0-aab5cafcc3b2",
+      "name": "Send a text message",
+      "webhookId": "914d3311-3f3f-4523-8bf0-4bed44946619",
+      "credentials": {
+        "telegramApi": {
+          "id": "IsTIOjHmi8xiRwWD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.urlScanIo",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        256
+      ],
+      "id": "23f80508-9465-4309-999c-e29b9af7d3fd",
+      "name": "Perform a scan",
+      "credentials": {
+        "urlScanIoApi": {
+          "id": "QagPzSmYyxMEQVqZ",
+          "name": "urlscan.io account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "045be32e-e275-4a4d-ae70-4f8479696b14",
+              "leftValue": "={{ $json.body.url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1616,
+        496
+      ],
+      "id": "f7e8ff23-1df1-46d0-8864-e818dbc11090",
+      "name": "KOndisi jika input sesuai format"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef528f31-d65a-4e92-9625-8b848830e123",
+              "leftValue": "={{ $json.error.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1344,
+        272
+      ],
+      "id": "f04a9b2c-b581-4105-94b9-c31ade75340d",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1a81331-89ce-495a-95bc-b0e9573937fc",
+              "name": "HASIL",
+              "value": "=IP dengan nilai {{ $('Webhook').item.json.body.url}} tidak ditemukan di database.  kemungkinan masih baru, belum dikenal, atau belum terindeks.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -912,
+        464
+      ],
+      "id": "c7a21fd9-358f-4b93-b128-99937e43bb03",
+      "name": "Hasil JIka Erorr"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39d519c9-3f01-4494-b7b7-f600f3a09f70",
+              "name": "HASIL",
+              "value": "=❌ Workflow Error  Workflow: NPhishing Triage Error: Field 'url' wajib diisi Input",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1232,
+        656
+      ],
+      "id": "9bd898a2-a406-498e-a528-a5e96842cf97",
+      "name": "Hasil JIka input Salah"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1bae9b08-23f2-41be-ad16-d279a635bc9d",
+              "name": "HASIL",
+              "value": "=🚨 Laporan Analisis URL 🚨 \n\n🔍 Target: {{ $json.data.requests[0].requests[1].redirectResponse.url }}\n🛡️ Status: {{ $json.data.requests[0].response.response.status }}\n💯 Skor Risiko: {{ $json.verdicts.overall.score }}\n\nDetail Infrastruktur:\n🌍 IP: {{ $json.data.requests[0].response.response.remoteIPAddress }}\n🏳️ Negara: {{ $json.data.requests[0].response.geoip.country }}\n🏢 ISP: {{ $json.data.requests[0].response.asn.description }}\n\n📸 Screenshot: {{ $json.task.screenshotURL }}\n🔗 Laporan Lengkap: {{ $json.task.reportURL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a9e1a981-9b4a-4e70-9d2c-b614b93cfae5",
+      "name": "Hasil Asli"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef528f31-d65a-4e92-9625-8b848830e123",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -384,
+        176
+      ],
+      "id": "f171a776-6997-4fac-9641-f8139217f85e",
+      "name": "If",
+      "executeOnce": true,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1040,
+        144
+      ],
+      "id": "515ae70d-4dab-4a69-8e91-74b36647a454",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "KOndisi jika input sesuai format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a scan": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get a scan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perform a scan": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KOndisi jika input sesuai format": {
+      "main": [
+        [
+          {
+            "node": "Perform a scan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hasil JIka input Salah",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hasil JIka Erorr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil JIka Erorr": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil JIka input Salah": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil Asli": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Hasil Asli",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2a500d1e-1412-4cf3-a767-641f5bcfe2e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a8512545ee126ef1db5f0f3a70bc0cfe54bee470939eb8d785f9d95ed5f14b7"
+  },
+  "id": "ST2VJ89WkniIYQei",
+  "tags": []
+}

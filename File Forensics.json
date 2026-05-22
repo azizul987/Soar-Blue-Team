@@ -1,0 +1,322 @@
+{
+  "name": "File Forensics",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Soar",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        192
+      ],
+      "id": "b3850ede-8ea0-4c15-8b9b-8e2c7fc63a66",
+      "name": "Webhook",
+      "webhookId": "33d17ae1-b136-473c-89f1-ddad39a35db8"
+    },
+    {
+      "parameters": {
+        "chatId": "1687588177",
+        "text": "={{ $json.HASIL }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        176
+      ],
+      "id": "453abe56-65d3-4c13-bc53-4d7de99a6ebe",
+      "name": "Send a text message",
+      "webhookId": "889fa7ae-5ad5-4657-9229-d0bd1b03966c",
+      "credentials": {
+        "telegramApi": {
+          "id": "IsTIOjHmi8xiRwWD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "curlImport": "",
+        "httpVariantWarning": "",
+        "method": "GET",
+        "url": "=https://www.virustotal.com/api/v3/files/{{ $json.body.hash }}",
+        "": "",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "virusTotalApi",
+        "provideSslCertificates": false,
+        "sendQuery": false,
+        "sendHeaders": false,
+        "sendBody": false,
+        "options": {},
+        "infoMessage": ""
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -384,
+        64
+      ],
+      "id": "ceecee63-c830-4976-a308-bbe0598ffc61",
+      "name": "VirusTotal HTTP Request",
+      "extendsCredential": "virusTotalApi",
+      "credentials": {
+        "virusTotalApi": {
+          "id": "zXHxx9pUPh8zHzrW",
+          "name": "VirusTotal account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39d519c9-3f01-4494-b7b7-f600f3a09f70",
+              "name": "HASIL",
+              "value": "=❌ Workflow Error  Workflow:File Forensic Error: Field 'Hash' wajib diisi Input",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        352
+      ],
+      "id": "69e6a693-89f3-4d8d-b29f-e906f1c0e805",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef528f31-d65a-4e92-9625-8b848830e123",
+              "leftValue": "={{ $json.error.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        64
+      ],
+      "id": "b403b434-6e7e-4be7-81c6-d3917bc1867c",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1a81331-89ce-495a-95bc-b0e9573937fc",
+              "name": "HASIL",
+              "value": "=Hash dengan nilai {{ $('Webhook').item.json.body.hash }} tidak ditemukan di database. File kemungkinan masih baru, belum dikenal, atau belum terindeks.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ],
+      "id": "5bd4d99b-731b-4a31-9ee1-7fc797db0806",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "045be32e-e275-4a4d-ae70-4f8479696b14",
+              "leftValue": "={{ $json.body.hash }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -576,
+        192
+      ],
+      "id": "c48d270a-ce65-49c1-ab63-6a556a5bc91d",
+      "name": "KOndisi jika input sesuai format"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1bae9b08-23f2-41be-ad16-d279a635bc9d",
+              "name": "HASIL",
+              "value": "=🚨 Notifikasi Analisis File\n\n📄 Nama File: {{ $json.data.attributes.meaningful_name }}\n🦠 Jenis Malware: {{ $json.data.attributes.popular_threat_classification.suggested_threat_label }}\n📊 Jumlah Deteksi: {{ $json.data.attributes.last_analysis_stats.malicious }}/{{ $json.data.attributes.last_analysis_stats.malicious + $json.data.attributes.last_analysis_stats.undetected + $json.data.attributes.last_analysis_stats.harmless + $json.data.attributes.last_analysis_stats.suspicious + $json.data.attributes.last_analysis_stats.timeout + $json.data.attributes.last_analysis_stats[\"confirmed-timeout\"] + $json.data.attributes.last_analysis_stats.failure + $json.data.attributes.last_analysis_stats[\"type-unsupported\"] }}\n\n🔐 SHA256: {{ $json.data.attributes.sha256 }}\n🔐 SHA1: {{ $json.data.attributes.sha1 }}\n🔐 MD5: {{ $json.data.attributes.md5 }}\n📦 Ukuran: {{ $json.data.attributes.size }} bytes\n📁 Tipe File: {{ $json.data.attributes.type_description }}\n🏷️ Ekstensi: {{ $json.data.attributes.type_extension }}\n🧪 Magic: {{ $json.data.attributes.magic }}\n⭐ Reputasi: {{ $json.data.attributes.reputation }}\n📅 Last Analysis: {{ $json.data.attributes.last_analysis_date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5063f5be-d199-4655-9ced-9beaac919cea",
+      "name": "Hasil Normal"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "KOndisi jika input sesuai format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VirusTotal HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Hasil Normal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KOndisi jika input sesuai format": {
+      "main": [
+        [
+          {
+            "node": "VirusTotal HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil Normal": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "163cd5bc-0f1c-4e15-9eed-054fcffbbc18",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a8512545ee126ef1db5f0f3a70bc0cfe54bee470939eb8d785f9d95ed5f14b7"
+  },
+  "id": "K6DOckZAxEThPQSu",
+  "tags": []
+}

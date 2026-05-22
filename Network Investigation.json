@@ -1,0 +1,326 @@
+{
+  "name": "Network Investigation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Soar",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        96
+      ],
+      "id": "242774be-b108-4247-be30-f5d90789fc72",
+      "name": "Webhook",
+      "webhookId": "4f56387f-b1e2-4fda-97be-c90a91012264"
+    },
+    {
+      "parameters": {
+        "chatId": "1687588177",
+        "text": "={{ $json.HASIL }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        112
+      ],
+      "id": "f554e098-9cb0-4fe2-8e3f-4672bb96afa4",
+      "name": "Send a text message",
+      "webhookId": "598ae0dc-2c38-46f3-8c5c-7a5fb7c1c61a",
+      "credentials": {
+        "telegramApi": {
+          "id": "IsTIOjHmi8xiRwWD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ipAddress",
+              "value": "={{ $json.body['ip'] }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Key",
+              "value": "b43ba8312e16dd8045ff2d5fd5ce58021466110810538333f618e84bd7e74681dc871d1fca8ac669"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "1a9f652c-b00b-46f5-aa2a-bcc6b58c054d",
+      "name": "Abuse Ipdb",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "045be32e-e275-4a4d-ae70-4f8479696b14",
+              "leftValue": "={{ $json.body.hash }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -192,
+        96
+      ],
+      "id": "86fd0e8d-5773-486c-b687-c76f680dc197",
+      "name": "KOndisi jika input sesuai format"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef528f31-d65a-4e92-9625-8b848830e123",
+              "leftValue": "={{ $json.error.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        -48
+      ],
+      "id": "fd7fbe4e-25e3-46f5-bcc6-c2d249565f8f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1bae9b08-23f2-41be-ad16-d279a635bc9d",
+              "name": "HASIL",
+              "value": "=🚨 Alert Reputasi IP 🚨\n\nIP Address: {{ $json.data.ipAddress }}\nNegara Asal: {{ $json.data.countryCode }}\nRisk Score: {{ $json.data.abuseConfidenceScore }}/100\n\nStatus: {{ $json.data.abuseConfidenceScore >= 75 ? \"HIGH RISK\" : $json.data.abuseConfidenceScore >= 25 ? \"MEDIUM RISK\" : \"LOW RISK\" }}\nISP: {{ $json.data.isp }}\nDomain: {{ $json.data.domain }}\nTotal Laporan: {{ $json.data.totalReports }}\nTerakhir Dilaporkan: {{ $json.data.lastReportedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        -128
+      ],
+      "id": "190dcdbd-c812-4d33-998d-14511b527375",
+      "name": "Hasil Normal"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1a81331-89ce-495a-95bc-b0e9573937fc",
+              "name": "HASIL",
+              "value": "=IP dengan nilai {{ $('Webhook').item.json.body.ip }} tidak ditemukan di database.  kemungkinan masih baru, belum dikenal, atau belum terindeks.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        64
+      ],
+      "id": "4195e08d-50f4-4090-a688-6d37556b4c05",
+      "name": "Hasil JIka Erorr"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39d519c9-3f01-4494-b7b7-f600f3a09f70",
+              "name": "HASIL",
+              "value": "=❌ Workflow Error  Workflow: Network Investigation Error: Field 'Hash' wajib diisi Input",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        336
+      ],
+      "id": "5654f9bf-62c3-463e-9730-27cf6957ebb3",
+      "name": "Hasil JIka input Salah"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "KOndisi jika input sesuai format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abuse Ipdb": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KOndisi jika input sesuai format": {
+      "main": [
+        [
+          {
+            "node": "Abuse Ipdb",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hasil JIka input Salah",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Hasil Normal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hasil JIka Erorr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil Normal": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil JIka Erorr": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hasil JIka input Salah": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f0c988f5-2057-43a3-9499-2805b8a2ea62",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a8512545ee126ef1db5f0f3a70bc0cfe54bee470939eb8d785f9d95ed5f14b7"
+  },
+  "id": "52IKmNCuWpsDo730",
+  "tags": []
+}
