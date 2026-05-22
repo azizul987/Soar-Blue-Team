@@ -10,13 +10,11 @@ Workflow ini dibuat menggunakan n8n untuk mengecek reputasi IP address, hash fil
 
 Project ini memiliki 3 workflow utama:
 
-1. Network Investigation  
+1. **Network Investigation**
    Mengecek reputasi IP address menggunakan AbuseIPDB atau VirusTotal.
-
-2. File Forensics  
+2. **File Forensics**
    Mengecek hash file untuk mengetahui apakah file terdeteksi sebagai malware menggunakan VirusTotal.
-
-3. Phishing Triage  
+3. **Phishing Triage**
    Menganalisis URL yang dicurigai phishing menggunakan URLScan.io dan mengirim hasilnya ke Telegram.
 
 ---
@@ -56,9 +54,11 @@ Workflow ini digunakan untuk mengecek reputasi IP address.
 
 Contoh input webhook:
 
-    {
-      "ip": "103.x.x.x"
-    }
+```json
+{
+  "ip": "103.x.x.x"
+}
+```
 
 Hasil yang dikirim ke Telegram:
 
@@ -67,11 +67,17 @@ Hasil yang dikirim ke Telegram:
 - Risk score
 - Status reputasi IP
 
-Screenshot terkait:
+### Tampilan Workflow
 
-- screenshots/01-network-workflow.png
-- screenshots/01-network-webhook-test.png
-- screenshots/01-network-telegram-output.png
+![Network Investigation Workflow](screenshots/Network%20Investigation.jpeg)
+
+### Testing Workflow
+
+![Network Investigation Test](screenshots/Network%20Investigation_Test.png)
+
+### Output Telegram
+
+![Network Investigation Output](screenshots/Network%20Investigation_Output.png)
 
 ---
 
@@ -81,9 +87,11 @@ Workflow ini digunakan untuk mengecek hash file dan mengetahui apakah file terse
 
 Contoh input webhook:
 
-    {
-      "hash": "44d88612fea8a8f36de82e1278abb02f"
-    }
+```json
+{
+  "hash": "44d88612fea8a8f36de82e1278abb02f"
+}
+```
 
 Hasil yang dikirim ke Telegram:
 
@@ -93,11 +101,17 @@ Hasil yang dikirim ke Telegram:
 - Jumlah deteksi
 - Status file
 
-Screenshot terkait:
+### Tampilan Workflow
 
-- screenshots/02-file-workflow.png
-- screenshots/02-file-webhook-test.png
-- screenshots/02-file-telegram-output.png
+![File Forensics Workflow](screenshots/File%20Forensic.jpeg)
+
+### Testing Workflow
+
+![File Forensics Test](screenshots/File%20Forensic_Test.png)
+
+### Output Telegram
+
+![File Forensics Output](screenshots/File%20Forensic_Output.png)
 
 ---
 
@@ -107,9 +121,11 @@ Workflow ini digunakan untuk menganalisis URL yang dicurigai sebagai phishing.
 
 Contoh input webhook:
 
-    {
-      "url": "http://example.com"
-    }
+```json
+{
+  "url": "http://example.com"
+}
+```
 
 Hasil yang dikirim ke Telegram:
 
@@ -118,19 +134,24 @@ Hasil yang dikirim ke Telegram:
 - Verdict hasil scan
 - Screenshot tampilan website
 
-Screenshot terkait:
+### Tampilan Workflow
 
-- screenshots/03-phishing-workflow.png
-- screenshots/03-phishing-webhook-test.png
-- screenshots/03-phishing-urlscan-result.png
-- screenshots/03-phishing-telegram-output.png
+![Phishing Triage Workflow](screenshots/Phising%20Triangle.jpeg)
+
+### Testing Workflow
+
+![Phishing Triage Test](screenshots/Phising%20Triangle_Test.png)
+
+### Output Telegram
+
+![Phishing Triage Output](screenshots/Phising%20Triangle_Test_Output.png)
 
 ---
 
 ## Cara Menjalankan
 
 1. Buka n8n.
-2. Import file workflow dari folder workflows.
+2. Import file workflow dari folder `workflows`.
 3. Masukkan API key dan token pada credential n8n.
 4. Aktifkan workflow.
 5. Test webhook menggunakan Postman.
