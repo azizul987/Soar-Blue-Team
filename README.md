@@ -46,26 +46,7 @@ Credential yang dibutuhkan:
 - Telegram Bot Token
 - Telegram Chat ID
 
----
-
 ## Network Investigation
-
-Workflow ini digunakan untuk mengecek reputasi IP address.
-
-Contoh input webhook:
-
-```json
-{
-  "ip": "103.x.x.x"
-}
-```
-
-Hasil yang dikirim ke Telegram:
-
-- IP Address
-- Negara asal
-- Risk score
-- Status reputasi IP
 
 ### Tampilan Workflow
 
@@ -77,29 +58,9 @@ Hasil yang dikirim ke Telegram:
 
 ### Output Telegram
 
-![Network Investigation Output](screenshots/Network%20Investigation_Output.png)
-
----
+![Network Investigation Output](screenshots/Network%20Investigation_Ouput.png)
 
 ## File Forensics
-
-Workflow ini digunakan untuk mengecek hash file dan mengetahui apakah file tersebut terdeteksi sebagai malware.
-
-Contoh input webhook:
-
-```json
-{
-  "hash": "44d88612fea8a8f36de82e1278abb02f"
-}
-```
-
-Hasil yang dikirim ke Telegram:
-
-- Hash file
-- Nama file
-- Jenis malware
-- Jumlah deteksi
-- Status file
 
 ### Tampilan Workflow
 
@@ -111,28 +72,9 @@ Hasil yang dikirim ke Telegram:
 
 ### Output Telegram
 
-![File Forensics Output](screenshots/File%20Forensic_Output.png)
-
----
+![File Forensics Output](screenshots/File%20Forensic_Ouput.png)
 
 ## Phishing Triage
-
-Workflow ini digunakan untuk menganalisis URL yang dicurigai sebagai phishing.
-
-Contoh input webhook:
-
-```json
-{
-  "url": "http://example.com"
-}
-```
-
-Hasil yang dikirim ke Telegram:
-
-- URL
-- Status malicious atau clean
-- Verdict hasil scan
-- Screenshot tampilan website
 
 ### Tampilan Workflow
 
@@ -144,9 +86,7 @@ Hasil yang dikirim ke Telegram:
 
 ### Output Telegram
 
-![Phishing Triage Output](screenshots/Phising%20Triangle_Test_Output.png)
-
----
+![Phishing Triage Output](screenshots/Phising%20Triangle_Test_Ouput.png)
 
 ## Cara Menjalankan
 
